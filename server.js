@@ -88,7 +88,6 @@ app.get('/find/:database/:collection', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
-
 app.post('/insert/:database/:collection', async (req, res) => {
     try {
         // Extract the request parameters using destructuring
@@ -98,18 +97,20 @@ app.post('/insert/:database/:collection', async (req, res) => {
         // Get the appropriate Mongoose model
         const Model = await getModel(database, collection);
         // Create a new instance of that model with the data
-        const newDocument = new Model(data)
+        const newDocument = new Model(data);
         // Save the new document to the database
-        await newDocument.save()
+        await newDocument.save();
         // Log a success message to the console
-        console.log(`document was saved to collection ${collection}`);
+        console.log("Document was created successfully.");
         // Send back the newly created document as JSON with a 201 status code
-        res.status(201).json({ message: "document was created successfully", document: newDocument });
+        res.status(201).json({
+            message: `Document saved successfully`, document: newDocument
+        });
     } catch (err) {
         // Log any errors to the console
-        console.error('there was a problem creating new document', err);
+        console.error("Something went wrong!", err);
         // Send back a 400 status code and the error message in the response
-        res.status(400).json({ error: err.message })
+        res.status(400).json({ error: err.message });
     }
 });
 
@@ -122,20 +123,20 @@ app.put('/update/:database/:collection/:id', async (req, res) => {
         // Get the appropriate Mongoose model
         const Model = await getModel(database, collection);
         // Find the document by id and update it
-        const updatedDocument = await Model.findByIdAndUpdate(id, data, { new: true, runValidators: true })
+        const updatedDocument = Model.findByIdAndUpdate(id, data, { new: true, runValidators: true });
         // If document was not found, early return with a 404 status and error message
         if (!updatedDocument) {
-            return res.status(404).json({ message: "Resource not found" })
-        }
+            return res.status(404).json({ message: "Document not found :(" });
+        };
         // Log a success message to the console
-        console.log("updated document successfully");
+        console.log("Document was updated successfully! :D")
         // Send back the updated document with a 200 status code
-        res.status(200).json({ message: "updated document successfuly", document: updatedDocument });
+        res.status(200).json({ message: `Document with ID: ${id} was updated successfully! :D` });
     } catch (err) {
         // Log error to the console
-        console.error("error in put route", err);
+        console.error("There was an error updating.");
         // Send back a 400 status code with the error message
-        res.status(400).json({ error: err.message })
+        res.status(400).json({ error: err.message });
     }
 });
 
@@ -146,23 +147,17 @@ app.delete('/delete/:database/:collection/:id', async (req, res) => {
         // Get the appropriate Mongoose model
         const Model = await getModel(database, collection);
         // Find and delete the document by id
-        const deletedDocument = Model.findByIdAndDelete(id);
-        // If document not found, return 404 status code with error message
-        if (!deletedDocument) {
-            return res.status(404).json({ error: "Document not found" });
-        }
-        // Log success message to the console
-        console.log(`document with id: ${id} deleted successfully`);
-        // Send back a success message with a 200 status code
-        res.status(200).json({ message: `Document with id: ${id} deleted successfully` });
+        const deleteDocument = Model.findByIdAndDelete(id);
+        if (!deleteDocument) {
+            return res.status(404).json({ message: "Document not deleted :(" });
+        };
+        console.log("Document was deleted successfully! :D")
+        res.status(200).json({ message: `Document with ID: ${id} was deleted successfully! :D` });
     } catch (err) {
-        // Log error to the console
-        console.error("Error with delete route", err);
-        // Send back a 400 status code with the error message
-        res.status(400).json({ error: err.message })
+        console.error("There was an error with deleting the document :(");
+        res.status(400).json({ error: err.message });
     }
 });
-
 // DELETE route to delete a specific collection in a database
 app.delete('/delete-collection/:database/:collection', async (req, res) => {
     try {
